@@ -7,7 +7,6 @@ import time
 import os, glob, shutil
 import cv2
 import argparse
-import random
 
 def multi_scale_search(pivot, screen, range=0.3, num=10):
     H, W = screen.shape[:2]
@@ -154,6 +153,13 @@ class WechatAutoJump(object):
                 print('multiscale-search, step: %04d' % self.step)
         if self.debug:
             self.debugging()
+        cv2.namedWindow("Image")
+        cv2.circle(self.state, (self.player_pos[1], self.player_pos[0]), 10, (0, 255, 0), thickness = -1)
+        cv2.circle(self.state, (self.target_pos[1], self.target_pos[0]), 10, (0, 0, 255), thickness = -1)
+        cv2.line(self.state, (self.player_pos[1], self.player_pos[0]), (self.target_pos[1], self.target_pos[0]), 255, 5)
+        cv2.imshow("Image", self.state)
+        cv2.waitKey(1)
+        cv2.destroyAllWindows()
         self.jump(self.player_pos, self.target_pos)
         self.step += 1
         time.sleep(1.4 + np.random.random())
