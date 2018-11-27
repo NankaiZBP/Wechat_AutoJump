@@ -10,6 +10,7 @@ import argparse
 import tensorflow as tf
 from model import JumpModel
 from model_fine import JumpModelFine
+import random
 
 def multi_scale_search(pivot, screen, range=0.3, num=10):
     H, W = screen.shape[:2]
@@ -155,10 +156,12 @@ class WechatAutoJump(object):
         return np.array([h, w])
 
     def jump(self, player_pos, target_pos):
-        distance = np.linalg.norm(player_pos - target_pos)
+        distance = np.linalg.norm(player_pos - target_pos) + random.random() * 30.0
         press_time = distance * self.sensitivity
         press_time = int(np.rint(press_time))
         press_h, press_w = int(0.82*self.resolution[0]), self.resolution[1]//2
+        press_h += random.gauss(10, 20)
+        press_w += random.gauss(10, 20)
         if self.phone == 'Android':
             cmd = 'adb shell input swipe {} {} {} {} {}'.format(press_w, press_h, press_w, press_h, press_time)
             print(cmd)
@@ -187,9 +190,17 @@ class WechatAutoJump(object):
                 print('CNN-search: %04d' % self.step)
         if self.debug:
             self.debugging()
+        cv2.namedWindow("Image")
+        cv2.moveWindow("Image", 50, 50)  # Move it to (50,50)
+        cv2.circle(self.state, (self.player_pos[1], self.player_pos[0]), 10, (0, 255, 0), thickness = -1)
+        cv2.circle(self.state, (self.target_pos[1], self.target_pos[0]), 10, (0, 0, 255), thickness = -1)
+        cv2.line(self.state, (self.player_pos[1], self.player_pos[0]), (self.target_pos[1], self.target_pos[0]), 255, 5)
+        cv2.imshow("Image", cv2.resize(self.state, (self.state.shape[1] // 2, self.state.shape[0] // 2), interpolation=cv2.INTER_NEAREST))
+        cv2.waitKey(1)
+        cv2.destroyAllWindows()
         self.jump(self.player_pos, self.target_pos)
         self.step += 1
-        time.sleep(1.5)
+        time.sleep(1.0 + np.random.random() * 3 )
 
     def run(self):
         try:
