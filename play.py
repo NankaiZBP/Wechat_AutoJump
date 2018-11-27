@@ -8,6 +8,7 @@ import os, glob, shutil
 import cv2
 import argparse
 
+# 多尺度搜索（Multiscale Search）在屏幕截图中中查找目标图片（小人或者跳台）的位置
 def multi_scale_search(pivot, screen, range=0.3, num=10):
     H, W = screen.shape[:2]
     h, w = pivot.shape[:2]
@@ -103,6 +104,8 @@ class WechatAutoJump(object):
                 target_pos = pos
         return np.array([(target_pos[0]+target_pos[2])//2, (target_pos[1]+target_pos[3])//2]) + sym_tl
 
+    # 白点是一个连通区域，像素值为（245，245，245）的像素个数稳定在280 - 310
+    # 之间，所以我们可以利用这个去直接找到目标的位置
     def get_target_position_fast(self, state, player_pos):
         state_cut = state[:player_pos[0],:,:]
         m1 = (state_cut[:, :, 0] == 245)
@@ -158,7 +161,7 @@ class WechatAutoJump(object):
         cv2.circle(self.state, (self.player_pos[1], self.player_pos[0]), 10, (0, 255, 0), thickness = -1)
         cv2.circle(self.state, (self.target_pos[1], self.target_pos[0]), 10, (0, 0, 255), thickness = -1)
         cv2.line(self.state, (self.player_pos[1], self.player_pos[0]), (self.target_pos[1], self.target_pos[0]), 255, 5)
-        cv2.imshow("Image", cv2.resize(self.state, (self.state.shape[1] / 2, self.state.shape[0] / 2), interpolation=cv2.INTER_CUBIC))
+        cv2.imshow("Image", cv2.resize(self.state, (self.state.shape[1] // 2, self.state.shape[0] // 2), interpolation=cv2.INTER_NEAREST))
         cv2.waitKey(1)
         cv2.destroyAllWindows()
         self.jump(self.player_pos, self.target_pos)
