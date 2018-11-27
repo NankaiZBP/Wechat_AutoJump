@@ -154,10 +154,11 @@ class WechatAutoJump(object):
         if self.debug:
             self.debugging()
         cv2.namedWindow("Image")
+        cv2.moveWindow("Image", 50, 50)  # Move it to (50,50)
         cv2.circle(self.state, (self.player_pos[1], self.player_pos[0]), 10, (0, 255, 0), thickness = -1)
         cv2.circle(self.state, (self.target_pos[1], self.target_pos[0]), 10, (0, 0, 255), thickness = -1)
         cv2.line(self.state, (self.player_pos[1], self.player_pos[0]), (self.target_pos[1], self.target_pos[0]), 255, 5)
-        cv2.imshow("Image", self.state)
+        cv2.imshow("Image", cv2.resize(self.state, (self.state.shape[1] / 2, self.state.shape[0] / 2), interpolation=cv2.INTER_CUBIC))
         cv2.waitKey(1)
         cv2.destroyAllWindows()
         self.jump(self.player_pos, self.target_pos)
